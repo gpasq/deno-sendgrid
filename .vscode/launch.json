@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Sendgrid",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "deno",
+            "runtimeArgs": [
+                "run"
+                "--inspect",
+                "--allow-net",
+                "sendgrid.ts"
+            ],
+            "port": 9229
+        },
+        {
+            "name": "Launch test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "deno",
+            "runtimeArgs": [
+                "test"
+                "--inspect",
+                "test.ts"
+            ],
+            "port": 9229
+        }
+    ]
+}
