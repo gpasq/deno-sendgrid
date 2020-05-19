@@ -60,6 +60,18 @@ export interface IPersonalization {
   subject: string;
 }
 
+export interface ISimpleRequestBody {
+  to: IAddress[];
+  cc?: IAddress[];
+  bcc?: IAddress[];
+  subject: string;
+  from: IAddress;
+  replyTo?: IAddress;
+  content: IContent[];
+  attachments?: IAttachment[];
+  templateId?: string;
+}
+
 export interface IRequestBody {
   personalizations: IPersonalization[];
   from: IAddress;
