@@ -11,10 +11,10 @@ let mail: IRequestBody = {
     personalizations: [
     {
         subject: "Hello world",
-        to: [{ name: "Greg Pasquariello", email: "greg@pasq.net" }],
+        to: [{ name: "Greg Pasquariello", email: "foo@bar.com" }],
     },
     ],
-    from: { email: "greg@pasq.net" },
+    from: { email: "foo@bar.com" },
     content: [
     { type: "text/plain", value: "Hello world" },
     { type: "text/html", value: "<h1>Hello world</h1>" },
@@ -24,8 +24,7 @@ let mail: IRequestBody = {
 let response = await sendMail(mail, { apiKey: "REDACTED" });
 ```
 
-The entire mail body is documented at https://sendgrid.com/docs/api-reference/.  At the moment the supported 
-schema is limited to the following. The rest will be available shortly.
+The entire mail body is documented at https://sendgrid.com/docs/api-reference/.  At the moment the supported schema is limited to the following. The rest will be available shortly.
 
 ```
 export interface IAddress {
@@ -53,8 +52,7 @@ export interface IRequestBody {
 }
 ```
 
-The response contains a success true/false flag, indicating whether the email was accepted by sendgrid.  If false, the
-response also contains an array of errors, sent back from SendGrid.  These are also documented at https://sendgrid.com/docs/api-reference/.
+The response contains a success true/false flag, indicating whether the email was accepted by sendgrid.  If false, the response also contains an array of errors, sent back from SendGrid.  These are also documented at https://sendgrid.com/docs/api-reference/.
 
 You will need a SendGrid API token to use this library, and `--allow-net` must be specified.
 
