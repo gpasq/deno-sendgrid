@@ -48,15 +48,27 @@ export interface IPersonalization {
 export interface IRequestBody {
   personalizations: IPersonalization[];
   from: IAddress;
-  reply_to?: IAddress;
+  replyTo?: IAddress;
   headers?: IHeader[];
   content: IContent[];
   attachments?: IAttachment[];
   templateId?: string;
 }
 
-export const sendMail = async (
-  requestBody: IRequestBody,
+export interface ISimpleRequestBody {
+  to: IAddress[];
+  cc?: IAddress[];
+  bcc?: IAddress[];
+  subject: string;
+  from: IAddress;
+  replyTo?: IAddress;
+  content: IContent[];
+  attachments?: IAttachment[];
+  templateId?: string;
+}
+
+const _sendMail = async (
+  requestBody: any,
   options: IOptions,
 ): Promise<IResult> => {
   let json = JSON.stringify(requestBody);
@@ -88,4 +100,41 @@ export const sendMail = async (
   } catch (ex) {}
 
   return result;
+};
+
+export const sendSimpleMail = async (
+  requestBody: ISimpleRequestBody,
+  options: IOptions,
+): Promise<IResult> => {
+  let mail: any = {
+    personalizations: [{
+      to: requestBody.to,
+      cc: requestBody.cc,
+      bcc: requestBody.bcc,
+      subject: requestBody.subject,
+    }],
+    from: requestBody.from,
+    reply_to: requestBody.replyTo,
+    content: requestBody.content,
+    attachments: requestBody.attachments,
+    templateId: requestBody.templateId,
+  };
+
+  return _sendMail(mail, options);
+};
+
+export const sendMail = async (
+  requestBody: IRequestBody,
+  options: IOptions,
+): Promise<IResult> => {
+  let mail: any = {
+    personalizations: requestBody.personalizations,
+    from: requestBody.from,
+    reply_to: requestBody.replyTo,
+    content: requestBody.content,
+    attachments: requestBody.attachments,
+    template_id: requestBody.templateId,
+  };
+
+  return _sendMail(mail, options);
 };
