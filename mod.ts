@@ -1,4 +1,3 @@
-#!/usr/local/bin/deno run
 const {
   args,
 } = Deno;
@@ -19,11 +18,6 @@ export interface IAddress {
   name?: string;
 }
 
-export interface IHeader {
-  name: string;
-  value: string;
-}
-
 export interface IContent {
   type: string;
   value: string;
@@ -42,17 +36,53 @@ export interface IPersonalization {
   cc?: IAddress[];
   bcc?: IAddress[];
   subject: string;
-  headers?: IHeader[];
+  substitutions?: any;
+  customArgs?: any;
+  dynamicTemplateData?: any;
+  headers?: any;
 }
 
 export interface IRequestBody {
   personalizations: IPersonalization[];
   from: IAddress;
   replyTo?: IAddress;
-  headers?: IHeader[];
   content: IContent[];
   attachments?: IAttachment[];
   templateId?: string;
+  headers?: any;
+  sections?: any;
+  categories?: string[];
+  customArgs?: any;
+  sendAt?: number;
+  batchId?: string;
+  ipPoolName?: string;
+  asm?: {
+    groupId: number;
+    groupsToDisplay: number[];
+  };
+  mailSettings?: {
+    bcc?: {
+      enable?: boolean;
+      email?: string;
+    };
+    bypassListManagement?: {
+      enable?: boolean;
+    };
+    footer?: {
+      enable?: boolean;
+      text?: string;
+      html?: string;
+    };
+    sandboxMode?: {
+      enable?: boolean;
+    };
+    spamCheck?: {
+      enable?: boolean;
+      threshold?: number;
+      postToUrl?: string;
+    };
+  };
+  //trackingSettings?
 }
 
 export interface ISimpleRequestBody {
@@ -65,13 +95,96 @@ export interface ISimpleRequestBody {
   content: IContent[];
   attachments?: IAttachment[];
   templateId?: string;
+  dynamicTemplateData?: any;
 }
 
-const _sendMail = async (
-  requestBody: any,
+//
+// Some keys shouldn't be snake cased.  These are those.
+//
+function isImmune(key: string): boolean {
+  switch (key) {
+    case "dynamicTemplateData":
+    case "customArgs":
+    case "headers":
+    case "sections":
+      return true;
+    default:
+      return false;
+  }
+}
+
+function snakeCaseString(str: string): string {
+  let result = str;
+
+  let matches = str.match(
+    /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g,
+  );
+  if (matches && matches.length) {
+    matches = matches.map((x: string) => {
+      return x.toLowerCase();
+    });
+    result = matches.join("_");
+  }
+  return result;
+}
+
+// function isAny(toBeDetermined: PersonOrAnimal): toBeDetermined is Animal {
+//   if((toBeDetermined as Animal).type){
+//     return true
+//   }
+//   return false
+// }
+// view raw
+
+function snakeCaseObject(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(function (val, key) {
+      return (typeof val === "object") ? snakeCaseObject(val) : val;
+    });
+  } else if (typeof obj === "object") {
+    var res: any = {};
+    for (var key in obj) {
+      var val = obj[key];
+      if (typeof val === "object") {
+        res[snakeCaseString(key)] = isImmune(key) ? val : snakeCaseObject(val);
+      } else {
+        res[snakeCaseString(key)] = val;
+      }
+    }
+    return res;
+  } else {
+    return obj;
+  }
+}
+
+export const sendSimpleMail = async (
+  requestBody: ISimpleRequestBody,
   options: IOptions,
 ): Promise<IResult> => {
-  let json = JSON.stringify(requestBody);
+  let mail: IRequestBody = {
+    personalizations: [{
+      to: requestBody.to,
+      cc: requestBody.cc,
+      bcc: requestBody.bcc,
+      subject: requestBody.subject,
+      dynamicTemplateData: requestBody.dynamicTemplateData,
+    }],
+    from: requestBody.from,
+    replyTo: requestBody.replyTo,
+    content: requestBody.content,
+    attachments: requestBody.attachments,
+    templateId: requestBody.templateId,
+  };
+
+  return sendMail(mail, options);
+};
+
+export const sendMail = async (
+  requestBody: IRequestBody,
+  options: IOptions,
+): Promise<IResult> => {
+  let mail = snakeCaseObject(requestBody);
+  let json = JSON.stringify(mail);
 
   const response = await fetch(sendgridUri, {
     method: "POST",
@@ -100,41 +213,4 @@ const _sendMail = async (
   } catch (ex) {}
 
   return result;
-};
-
-export const sendSimpleMail = async (
-  requestBody: ISimpleRequestBody,
-  options: IOptions,
-): Promise<IResult> => {
-  let mail: any = {
-    personalizations: [{
-      to: requestBody.to,
-      cc: requestBody.cc,
-      bcc: requestBody.bcc,
-      subject: requestBody.subject,
-    }],
-    from: requestBody.from,
-    reply_to: requestBody.replyTo,
-    content: requestBody.content,
-    attachments: requestBody.attachments,
-    templateId: requestBody.templateId,
-  };
-
-  return _sendMail(mail, options);
-};
-
-export const sendMail = async (
-  requestBody: IRequestBody,
-  options: IOptions,
-): Promise<IResult> => {
-  let mail: any = {
-    personalizations: requestBody.personalizations,
-    from: requestBody.from,
-    reply_to: requestBody.replyTo,
-    content: requestBody.content,
-    attachments: requestBody.attachments,
-    template_id: requestBody.templateId,
-  };
-
-  return _sendMail(mail, options);
 };

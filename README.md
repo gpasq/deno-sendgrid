@@ -2,23 +2,27 @@
 This is an early implementation of SendGrid for Deno.  This first version can send basic text
 or HTML email.  I'll be beefing it up over the next couple of weeks to fully support the platform.
 
-Sending simple email is easy:
+Sending simple email is easy.  This is the entire program:
 ```
-    let response = await sendSimpleMail(
-      {
-        subject: "Hello world",
-        to: [{ email: "foo@bar.com" }],
-        from: { email: "from@bar.com" },
-        content: [
-          { type: "text/plain", value: "Hello world" },
-          { type: "text/html", value: "<h1>Hello world</h1>" },
-        ],
-      },
-      { apiKey: "REDACTED" },
-    );
+import { sendSimpleMail } from "./mod.ts";
+
+await sendSimpleMail(
+  {
+    subject: "Hello world",
+    to: [{ email: "greg@pasq.net" }],
+    from: { email: "greg@pasq.net" },
+    content: [
+      { type: "text/plain", value: "Hello world" },
+      { type: "text/html", value: "<h1>Hello world</h1>" },
+    ],
+  },
+  {
+    apiKey: "REDACTED",
+  },
+);
 ```
 
-You can send full-blown SendGrid email packet as well (still limited in this release)
+You can send a full-blown SendGrid email packet as well (still limited in this release)
 
 ```
 import { sendMail, IRequestBody } from "https://deno.land/x/sendgrid/mod.ts";
@@ -75,7 +79,7 @@ export interface ISimpleRequestBody {
 export interface IRequestBody {
   personalizations: IPersonalization[];
   from: IAddress;
-  reply_to?: IAddress;
+  replyTo?: IAddress;
   content: IContent[];
 }
 ```
@@ -88,5 +92,6 @@ Enjoy for now, more to follow shortly!
 
 ## Release History
 
+- Version 0.0.3, Added case translation for input object.
 - Version 0.0.2, Added `sendSimpleMail`.
 - Version 0.0.1, initial release.
