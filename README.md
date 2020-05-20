@@ -92,5 +92,6 @@ Enjoy for now, more to follow shortly!
 
 ## Release History
 
+- Version 0.0.3, Added case translation for input object.
 - Version 0.0.2, Added `sendSimpleMail`.
 - Version 0.0.1, initial release.
